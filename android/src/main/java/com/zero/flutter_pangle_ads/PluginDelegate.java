@@ -170,7 +170,6 @@ public class PluginDelegate implements MethodChannel.MethodCallHandler, EventCha
      */
     public void initAd(MethodCall call, final MethodChannel.Result result) {
         String appId = call.argument("appId");
-        boolean useTextureView = call.argument("useTextureView");
         boolean supportMultiProcess = call.argument("supportMultiProcess");
         boolean allowShowNotify = call.argument("allowShowNotify");
         ArrayList directDownloadNetworkType = call.argument("directDownloadNetworkType");
@@ -178,7 +177,6 @@ public class PluginDelegate implements MethodChannel.MethodCallHandler, EventCha
         // 构建配置
         TTAdConfig config = new TTAdConfig.Builder()
                 .appId(appId)
-                .useTextureView(useTextureView) //使用TextureView控件播放视频,默认为SurfaceView,当有SurfaceView冲突的场景，可以使用TextureView
                 .allowShowNotify(allowShowNotify) //是否允许sdk展示通知栏提示
                 .debug(BuildConfig.DEBUG) //测试阶段打开，可以通过日志排查问题，上线时去除该调用
                 .supportMultiProcess(supportMultiProcess)//是否支持多进程
@@ -186,6 +184,17 @@ public class PluginDelegate implements MethodChannel.MethodCallHandler, EventCha
                 .build();
         // 初始化 SDK
         TTAdSdk.init(activity.getApplicationContext(), config);
+        TTAdSdk.start(new TTAdSdk.Callback() {
+            @Override
+            public void success() {
+                result.success(true);
+            }
+
+            @Override
+            public void fail(int code, String msg) {
+                result.error("INIT_AD_ERROR", msg, null);
+            }
+        });
         // 升级提示
         Log.w(TAG, "🎉🎉🎉 FlutterAds ==> 初始化完成，推荐使用 GroMore Pro 版本，获得更高的收益：https://flutterads.top/");
     }
